@@ -45,3 +45,4 @@ printf '2. Add \$(appIdSuffix) in iOS Build Settings\n'
 printf "3. Add a new run script as follows in iOS Build Phases:\n"
 printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/GoogleService-Info.plist\n"
 printf "\e[1;34m----------------------------------------------------------\e[0m\n"
+rm setup.txt
