@@ -19,7 +19,7 @@
 ### install
 1. setup.txtを実行
 ``` bash
-bash setup.txt
+bash setup.txt [アプリ名]
 ```
 
 2. Edit appName in dart_defines/
