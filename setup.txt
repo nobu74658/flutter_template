@@ -1,0 +1,47 @@
+flutter create . --project-name=flutter_boilerplate --platforms ios,android,web
+flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
+printf "\e[1;34mselect release firebase project\e[0m\n"
+flutterfire configure
+mkdir ios/prod
+cp ios/Runner/GoogleService-Info.plist ios/prod/GoogleService-Info.plist
+mkdir android/app/src/prod
+cp android/app/google-services.json android/app/src/prod/google-services.json
+mkdir ios/stg
+cp ios/Runner/GoogleService-Info.plist ios/stg/GoogleService-Info.plist
+mkdir android/app/src/stg
+cp android/app/google-services.json android/app/src/stg/google-services.json
+cp ios/firebase_app_id_file.json ios/prod/firebase_app_id_file.json
+mv ios/firebase_app_id_file.json ios/stg/firebase_app_id_file.json
+printf "\e[1;34mselect development firebase project\e[0m\n"
+printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
+flutterfire configure
+mkdir ios/dev
+cp ios/Runner/GoogleService-Info.plist ios/dev/GoogleService-Info.plist
+mkdir android/app/src/dev
+cp android/app/google-services.json android/app/src/dev/google-services.json
+cd android/app
+mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
+awk '/defaultConfig \{/{p=1} p && !/defaultConfig \{/{printf "        applicationIdSuffix appIdSuffix\n        resValue \"string\", \"app_name\", appName \n"; p=0} 1' build.gradle > build.gradle.tmp && mv build.gradle.tmp build.gradle
+echo '
+task selectGoogleServicesJson(type: Copy) {
+    from "src/$flavor/google-services.json"
+    into "./"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "processDebugGoogleServices" || task.name == "processReleaseGoogleServices") {
+        task.dependsOn selectGoogleServicesJson
+    }
+}' >> build.gradle
+cd src/main
+awk '/android:label=/ {gsub(/android:label="[^"]*"/, "android:label=\"@string\\/app_name\"")} 1' AndroidManifest.xml > tmpfile && mv tmpfile AndroidManifest.xml
+cd ../../../../
+/usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'アプリ機能のプロフィールなどに表示・使用するための写真や動画を表示する目的でリクエストします。'" ios/Runner/Info.plist
+awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
+printf "\e[1;34m----------------------------------------------------------\n"
+printf '1. Edit appName in dart_defines/\n'
+printf '2. Add \$(appIdSuffix) in iOS Build Settings\n'
+printf "3. Add a new run script as follows in iOS Build Phases:\n"
+printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/GoogleService-Info.plist\n"
+printf "\e[1;34m----------------------------------------------------------\e[0m\n"
