@@ -64,6 +64,27 @@ cd ../../../../
 /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'アプリ機能のプロフィールなどに表示・使用するための写真や動画を表示する目的でリクエストします。'" ios/Runner/Info.plist
 awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
 
+## ios/Podfile Firebaseの設定
+awk '/target '\''Runner'\'' do/,/end/ {
+  if ($0 ~ /flutter_install_all_ios_pods/) {
+    print "  pod \047FirebaseFirestore\047, :git => \047https://github.com/invertase/firestore-ios-sdk-frameworks.git\047, :tag => \04710.9.0\047"
+  }
+} !/target '\''Runner'\'' do/,/end/' ios/Podfile > ios/Podfile.tmp && mv ios/Podfile.tmp ios/Podfile
+
+awk '/flutter_additional_ios_build_settings\(target\)/,/end/ {
+    if ($0 ~ /end/) {
+        print "    target.build_configurations.each do |config|"
+        print "      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = \04713.0\047"
+        print ""
+        print "      xcconfig_path = config.base_configuration_reference.real_path"
+        print "      xcconfig = File.read(xcconfig_path)"
+        print "      xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, \047TOOLCHAIN_DIR\047)"
+        print "      File.open(xcconfig_path, \047w\047) { |file| file << xcconfig_mod }"
+        print "    end"
+    }
+} !/target '\''Runner'\'' do/,/end/' ios/Podfile > ios/Podfile.tmp && mv ios/Podfile.tmp ios/Podfile
+
+
 # 手動で設定する必要がある箇所を表示
 printf "\e[1;34m----------------------------------------------------------\n"
 printf '1. Edit appName in dart_defines/\n'
