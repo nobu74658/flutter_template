@@ -1,33 +1,47 @@
 #!/bin/bash
 
+# flutter プロジェクト作成
 flutter create . --project-name=$1 --platforms ios,android,web
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
+
+
+# 本番環境と開発環境のfirebaseを選択
+## 本番環境
 printf "\e[1;34mselect release firebase project\e[0m\n"
 flutterfire configure
-mkdir ios/prod
-cp ios/Runner/GoogleService-Info.plist ios/prod/GoogleService-Info.plist
-mkdir android/app/src/prod
-cp android/app/google-services.json android/app/src/prod/google-services.json
-mkdir ios/stg
-mv ios/Runner/GoogleService-Info.plist ios/stg/GoogleService-Info.plist
-mkdir android/app/src/stg
-cp android/app/google-services.json android/app/src/stg/google-services.json
-cp ios/firebase_app_id_file.json ios/prod/firebase_app_id_file.json
-mv ios/firebase_app_id_file.json ios/stg/firebase_app_id_file.json
 mkdir lib/const/firebase
 mv lib/firebase_options.dart lib/const/firebase/firebase_prod_options.dart
+### ios
+mkdir ios/prod
+cp ios/Runner/GoogleService-Info.plist ios/prod/GoogleService-Info.plist
+cp ios/firebase_app_id_file.json ios/prod/firebase_app_id_file.json
+mkdir ios/stg
+mv ios/Runner/GoogleService-Info.plist ios/stg/GoogleService-Info.plist
+mv ios/firebase_app_id_file.json ios/stg/firebase_app_id_file.json
+### android
+mkdir android/app/src/prod
+cp android/app/google-services.json android/app/src/prod/google-services.json
+mkdir android/app/src/stg
+mv android/app/google-services.json android/app/src/stg/google-services.json
+
+## 開発環境
 printf "\e[1;34mselect development firebase project\e[0m\n"
 printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
 flutterfire configure
+mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
+### ios
 mkdir ios/dev
 cp ios/Runner/GoogleService-Info.plist ios/dev/GoogleService-Info.plist
+mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
+### android
 mkdir android/app/src/dev
 cp android/app/google-services.json android/app/src/dev/google-services.json
-mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
-mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
+
+
+# 本番環境と開発環境を分けるための設定
+## android/app/build.gradle
 cd android/app
-mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
 awk '/defaultConfig \{/{p=1} p && !/defaultConfig \{/{printf "        applicationIdSuffix appIdSuffix\n        resValue \"string\", \"app_name\", appName \n"; p=0} 1' build.gradle > build.gradle.tmp && mv build.gradle.tmp build.gradle
 echo '
 task selectGoogleServicesJson(type: Copy) {
@@ -40,11 +54,17 @@ tasks.whenTaskAdded { task ->
         task.dependsOn selectGoogleServicesJson
     }
 }' >> build.gradle
+
+## android/app/src/main/AndroidManifest.xml
 cd src/main
 awk '/android:label=/ {gsub(/android:label="[^"]*"/, "android:label=\"@string\\/app_name\"")} 1' AndroidManifest.xml > tmpfile && mv tmpfile AndroidManifest.xml
 cd ../../../../
+
+## ios/Runner/Info.plist に写真フォルダへのアクセス許可を追加
 /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'アプリ機能のプロフィールなどに表示・使用するための写真や動画を表示する目的でリクエストします。'" ios/Runner/Info.plist
 awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
+
+# 手動で設定する必要がある箇所を表示
 printf "\e[1;34m----------------------------------------------------------\n"
 printf '1. Edit appName in dart_defines/\n'
 printf '2. Add \$(appIdSuffix) in iOS Build Settings\n'
