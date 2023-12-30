@@ -10,11 +10,13 @@ cp ios/Runner/GoogleService-Info.plist ios/prod/GoogleService-Info.plist
 mkdir android/app/src/prod
 cp android/app/google-services.json android/app/src/prod/google-services.json
 mkdir ios/stg
-cp ios/Runner/GoogleService-Info.plist ios/stg/GoogleService-Info.plist
+mv ios/Runner/GoogleService-Info.plist ios/stg/GoogleService-Info.plist
 mkdir android/app/src/stg
 cp android/app/google-services.json android/app/src/stg/google-services.json
 cp ios/firebase_app_id_file.json ios/prod/firebase_app_id_file.json
 mv ios/firebase_app_id_file.json ios/stg/firebase_app_id_file.json
+mkdir lib/const/firebase
+mv lib/firebase_options.dart lib/const/firebase/firebase_prod_options.dart
 printf "\e[1;34mselect development firebase project\e[0m\n"
 printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
 flutterfire configure
@@ -22,6 +24,8 @@ mkdir ios/dev
 cp ios/Runner/GoogleService-Info.plist ios/dev/GoogleService-Info.plist
 mkdir android/app/src/dev
 cp android/app/google-services.json android/app/src/dev/google-services.json
+mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
+mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
 cd android/app
 mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
 awk '/defaultConfig \{/{p=1} p && !/defaultConfig \{/{printf "        applicationIdSuffix appIdSuffix\n        resValue \"string\", \"app_name\", appName \n"; p=0} 1' build.gradle > build.gradle.tmp && mv build.gradle.tmp build.gradle
