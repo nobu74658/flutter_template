@@ -74,7 +74,7 @@ awk '/target '\''Runner'\'' do/,/end/ {
 awk '/flutter_additional_ios_build_settings\(target\)/,/end/ {
     if ($0 ~ /end/) {
         print "    target.build_configurations.each do |config|"
-        print "      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = \04713.0\047"
+        print "      config.build_settings[\047IPHONEOS_DEPLOYMENT_TARGET\047] = \04713.0\047"
         print ""
         print "      xcconfig_path = config.base_configuration_reference.real_path"
         print "      xcconfig = File.read(xcconfig_path)"
