@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # flutter プロジェクト作成
-flutter create . --project-name=$1 --org $2 --platforms ios,android,web
+# 例： bash setup.sh com.hoge なら com.hoge.app というパッケージ名になる
+flutter create . --project-name=app --org $1 --platforms ios,android,web
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -9,7 +10,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 # 本番環境と開発環境のfirebaseを選択
 ## 本番環境
 printf "\e[1;34mselect release firebase project\e[0m\n"
-flutterfire configure --ios-bundle-id $2 --android-package-name $2
+flutterfire configure
 mkdir lib/const/firebase
 mv lib/firebase_options.dart lib/const/firebase/firebase_prod_options.dart
 ### ios
@@ -28,7 +29,7 @@ mv android/app/google-services.json android/app/src/stg/google-services.json
 ## 開発環境
 printf "\e[1;34mselect development firebase project\e[0m\n"
 printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
-flutterfire configure --ios-bundle-id $2.dev --android-package-name $2.dev
+flutterfire configure
 mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
 ### ios
 mkdir ios/dev
