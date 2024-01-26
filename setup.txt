@@ -62,7 +62,7 @@ cd ../../../../
 
 ## ios/Runner/Info.plist に写真フォルダへのアクセス許可を追加
 /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'アプリ機能のプロフィールなどに表示・使用するための写真や動画を表示する目的でリクエストします。'" ios/Runner/Info.plist
-awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
+awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
 
 ## ios/Podfile Firebaseの設定
 awk '/target '\''Runner'\'' do/,/end/ {
