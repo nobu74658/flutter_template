@@ -64,6 +64,22 @@ cd ../../../../
 /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'アプリ機能のプロフィールなどに表示・使用するための写真や動画を表示する目的でリクエストします。'" ios/Runner/Info.plist
 awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
 
+## REVERSED_CLIENT_IDを追加
+awk '/<\/dict>/ {
+  print "    <key>CFBundleURLTypes</key>"
+  print "    <array>"
+  print "        <dict>"
+  print "            <key>CFBundleTypeRole</key>"
+  print "            <string>Editor</string>"
+  print "            <key>CFBundleURLSchemes</key>"
+  print "            <array>"
+  print "                <string>\$\(REVERSED_CLIENT_ID\)</string>"
+  print "            </array>"
+  print "        </dict>"
+  print "    </array>"
+} 1' Info.plist > Info.plist.tmp && mv Info.plist.tmp Info.plist
+
+
 ## ios/Podfile Firebaseの設定
 awk '/target '\''Runner'\'' do/,/end/ {
   if ($0 ~ /flutter_install_all_ios_pods/) {
@@ -89,7 +105,8 @@ awk '/flutter_additional_ios_build_settings\(target\)/,/end/ {
 printf "\e[1;34m----------------------------------------------------------\n"
 printf '1. Edit appName in dart_defines/\n'
 printf '2. Add \$(appIdSuffix) in iOS Build Settings\n'
-printf "3. Add a new run script as follows in iOS Build Phases:\n"
+printf '3. Add \$(REVERSED_CLIENT_ID) in iOS Build Settings\n'
+printf "4. Add a new run script as follows in iOS Build Phases:\n"
 printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/GoogleService-Info.plist\n"
 printf "\e[1;34m----------------------------------------------------------\e[0m\n"
 rm setup.txt
