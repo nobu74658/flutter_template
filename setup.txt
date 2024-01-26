@@ -78,7 +78,7 @@ awk '/<\/dict>/ {
   print "            </array>"
   print "        </dict>"
   print "    </array>"
-} 1' Info.plist > Info.plist.tmp && mv Info.plist.tmp Info.plist
+} 1' ios/Runner/Info.plist > Info.plist.tmp && mv Info.plist.tmp ios/Runner/Info.plist
 
 
 ## ios/Podfile Firebaseの設定
