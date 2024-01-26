@@ -24,7 +24,8 @@ bash setup.txt [project-name]
 
 2. Edit appName in dart_defines/
 3. Add \$(appIdSuffix) in iOS Build Settings
-4. Add a new run script as follows in iOS Build Phases:
+4. Add \$(REVERSED_CLIENT_ID) in iOS Build Settings
+5. Add a new run script as follows in iOS Build Phases:
     cp -f ${SRCROOT}/${flavor}/GoogleService-Info.plist ${SRCROOT}/GoogleService-Info.plist
 
 参考：https://zenn.dev/altiveinc/articles/separating-environments-in-flutter
