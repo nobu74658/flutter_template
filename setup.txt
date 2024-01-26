@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # flutter プロジェクト作成
-flutter create . --project-name=$1 --org $2 --platforms ios,android,web
+# 例： bash setup.sh com.hoge なら com.hoge.app というパッケージ名になる
+flutter create . --project-name=app --org $1 --platforms ios,android,web
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -77,7 +78,7 @@ awk '/<\/dict>/ {
   print "            </array>"
   print "        </dict>"
   print "    </array>"
-} 1' Info.plist > Info.plist.tmp && mv Info.plist.tmp Info.plist
+} 1' ios/Runner/Info.plist > Info.plist.tmp && mv Info.plist.tmp ios/Runner/Info.plist
 
 
 ## ios/Podfile Firebaseの設定

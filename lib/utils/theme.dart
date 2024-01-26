@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 ThemeData getAppTheme() => ThemeData(
-      useMaterial3: false,
       scaffoldBackgroundColor: Colors.white,
       brightness: Brightness.light,
       fontFamily: 'Regular',
