@@ -1,0 +1,98 @@
+workflows:
+  # ----------- Android Workflow ------------
+  android-workflow:
+    name: Android Workflow
+    max_build_duration: 120
+    environment:
+      android_signing:
+        - mac pro key # 設定画面で登録した名前
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "com.example.app" # Package name of the app
+        GOOGLE_PLAY_TRACK: alpha
+      flutter: stable # Select Flutter version
+    scripts:
+      - name: Set up local.properties
+        script: | 
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: | 
+          flutter packages pub get
+      - name: Build AAB with Flutter
+        # dart-defineを使わないなら --dart-defile-from-fileは不要
+        script: | 
+          BUILD_NUMBER=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks="$GOOGLE_PLAY_TRACK") + 1))      
+          flutter build appbundle --release \
+            --dart-define-from-file=dart_defines/prod.json \
+            --build-name=1.0.$BUILD_NUMBER \
+            --build-number=$BUILD_NUMBER
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - hoge@example.com # Email address
+        notify:
+          success: true
+          failure: false
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: $GOOGLE_PLAY_TRACK
+        submit_as_draft: true
+
+# ----------- iOS Workflow ------------
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 120
+    integrations:
+      app_store_connect: App Manager for Codemagic # 設定画面で登録した名前
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.example.app # Bundle identifier of the app
+      vars:
+        APP_STORE_APPLE_ID: 0123456789 # App Store Connect Apple ID
+      flutter: stable # Select Flutter version
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: | 
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: | 
+          flutter packages pub get
+      - name: Install pods
+        script: | 
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter build ipa
+        # dart-defineを使わないなら --dart-defile-from-fileは不要
+        script: | 
+          flutter build ipa --release \
+            --dart-define-from-file=dart_defines/prod.json \
+            --build-name=1.0.0 \
+            --build-number=$(($(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID") + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - hoge@example.com # Email address
+        notify:
+          success: true
+          failure: false
+      app_store_connect:
+        auth: integration
+
+        # Note: This action is performed during post-processing.
+        submit_to_testflight: true
+        beta_groups: # Specify the names of beta tester groups that will get access to the build once it has passed beta review.
+          - test
+
+        # Configuration related to App Store (optional)
+        # Note: This action is performed during post-processing.
+        submit_to_app_store: false
