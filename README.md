@@ -1,5 +1,5 @@
 ## 概要
-Dart-define-from-fileを使って開発環境と本番環境を分ける記事（https://zenn.dev/altiveinc/articles/separating-environments-in-flutter）を元に
+Dart-define-from-fileを使って開発環境と本番環境を分ける記事（ https://zenn.dev/altiveinc/articles/separating-environments-in-flutter ）を元に
 setup.shを実行すると9割程自動で環境を分けることができるテンプレートです。
 そのほかに自分の好みでlibファイルにログイン機能などが入っているので、分離して別のプロジェクトに公開しようと思います。
 
