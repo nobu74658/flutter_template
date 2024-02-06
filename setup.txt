@@ -10,7 +10,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 # 本番環境と開発環境のfirebaseを選択
 ## 本番環境
 printf "\e[1;34mselect release firebase project\e[0m\n"
-flutterfire configure
+flutterfire configure --ios-bundle-id=$1.app --android-package-name=$1.app
 mkdir lib/const/firebase
 mv lib/firebase_options.dart lib/const/firebase/firebase_prod_options.dart
 ### ios
@@ -29,7 +29,7 @@ mv android/app/google-services.json android/app/src/stg/google-services.json
 ## 開発環境
 printf "\e[1;34mselect development firebase project\e[0m\n"
 printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
-flutterfire configure
+flutterfire configure --ios-bundle-id=$1.app.dev --android-package-name=$1.app.dev
 mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
 ### ios
 mkdir ios/dev
@@ -142,6 +142,6 @@ printf "3. Add a new run script as follows in iOS Build Phases:\n"
 printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/Runner/GoogleService-Info.plist\n"
 printf "4. Product > Scheme > Edit Scheme \n"
 printf "   Select Pre-actions and Add New Run Script Action\n"
-printf "    ${SRCROOT}/scripts/extract_dart_defines.sh\n"
+printf "    \${SRCROOT}/scripts/extract_dart_defines.sh\n"
 printf "\e[1;34m----------------------------------------------------------\e[0m\n"
 rm setup.txt
