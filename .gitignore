@@ -45,3 +45,4 @@ app.*.map.json
 # 開発環境と本番環境を分離
 **/android/app/google-services.json
 **/ios/GoogleService-Info.plist
+**/ios/Flutter/Dart-Defines.xcconfig

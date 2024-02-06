@@ -42,11 +42,31 @@ cp android/app/google-services.json android/app/src/dev/google-services.json
 
 # 本番環境と開発環境を分けるための設定
 ## android/app/build.gradle
+# dart-define を入れる変数を宣言
+buildGradleFile="android/app/build.gradle"
+newCode='// dart-define を入れる変数を宣言\
+def dartDefines = [:];\
+if (project.hasProperty('"dart-defines"')) {\
+    // カンマ区切りかつBase64でエンコードされている dart-defines をデコードして変数に格納します。\
+    dartDefines = dartDefines + project.property('"dart-defines"')\
+        .split(',')\
+        .collectEntries { entry ->\
+            def pair = new String(entry.decodeBase64(), 'UTF-8').split('=')\
+            [(pair.first()): pair.last()]\
+        }\
+}\
+'
+lineNumber=$(awk '/def flutterVersionName = localProperties.getProperty/{print NR}' "$buildGradleFile")
+awk -v line="$lineNumber" -v text="$newCode" 'NR == line {printf "%s\n", text} {print}' "$buildGradleFile" > temp.gradle && mv temp.gradle "$buildGradleFile"
+
+# 変数を設定
 cd android/app
-awk '/defaultConfig \{/{p=1} p && !/defaultConfig \{/{printf "        applicationIdSuffix appIdSuffix\n        resValue \"string\", \"app_name\", appName \n"; p=0} 1' build.gradle > build.gradle.tmp && mv build.gradle.tmp build.gradle
+awk '/defaultConfig \{/{p=1} p && !/defaultConfig \{/{c=4; printf "        minSdkVersion 24\n        applicationId \"${dartDefines.appId}\"\n        resValue \"string\", \"app_name\", \"${dartDefines.appName}\"\n"; p=0; next} c {c--; next} 1' build.gradle > build.gradle.tmp && mv build.gradle.tmp build.gradle
+
+# Firebase対応
 echo '
 task selectGoogleServicesJson(type: Copy) {
-    from "src/$flavor/google-services.json"
+    from "src/${dartDefines.flavor}/google-services.json"
     into "./"
 }
 
@@ -58,12 +78,24 @@ tasks.whenTaskAdded { task ->
 
 ## android/app/src/main/AndroidManifest.xml
 cd src/main
-awk '/android:label=/ {gsub(/android:label="[^"]*"/, "android:label=\"@string\\/app_name\"")} 1' AndroidManifest.xml > tmpfile && mv tmpfile AndroidManifest.xml
+awk '/android:label=/ {gsub(/android:label="[^"]*"/, "android:label=\"@string\/app_name\"")} 1' AndroidManifest.xml > tmpfile && mv tmpfile AndroidManifest.xml
 cd ../../../../
+
+## ios scriptファイル
+mkdir ios/scripts
+mv extract_dart_defines.sh ios/scripts/extract_dart_defines.sh
+chmod 755 ios/scripts/extract_dart_defines.sh
 
 ## ios/Runner/Info.plist に写真フォルダへのアクセス許可を追加
 /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'アプリ機能のプロフィールなどに表示・使用するための写真や動画を表示する目的でリクエストします。'" ios/Runner/Info.plist
-awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\$(appName)<\/string>\n   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
+
+## keyとstringを設定
+awk '/<key>CFBundleName<\/key>/ {getline; printf "   <key>CFBundleName<\/key>\n   <string>\$(appName)<\/string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
+awk '/<key>CFBundleDisplayName<\/key>/ {getline; printf "   <key>CFBundleDisplayName</key>\n   <string>$(appName)</string>\n"; next} 1' ios/Runner/Info.plist | sed 's/^/ /' > Info_tmp.plist && mv Info_tmp.plist ios/Runner/Info.plist
+
+## includeを追加
+echo "#include \"Dart-Defines.xcconfig\"" >> ios/Flutter/Debug.xcconfig
+echo "#include \"Dart-Defines.xcconfig\"" >> ios/Flutter/Release.xcconfig
 
 ## REVERSED_CLIENT_IDを追加
 awk '/<\/dict>/ {
@@ -74,7 +106,7 @@ awk '/<\/dict>/ {
   print "            <string>Editor</string>"
   print "            <key>CFBundleURLSchemes</key>"
   print "            <array>"
-  print "                <string>\$\(REVERSED_CLIENT_ID\)</string>"
+  print "                <string>\$\(googleReversedClientId\)</string>"
   print "            </array>"
   print "        </dict>"
   print "    </array>"
@@ -104,10 +136,12 @@ awk '/flutter_additional_ios_build_settings\(target\)/,/end/ {
 
 # 手動で設定する必要がある箇所を表示
 printf "\e[1;34m----------------------------------------------------------\n"
-printf '1. Edit appName in dart_defines/\n'
-printf '2. Add \$(appIdSuffix) in iOS Build Settings\n'
-printf '3. Add \$(REVERSED_CLIENT_ID) in iOS Build Settings\n'
-printf "4. Add a new run script as follows in iOS Build Phases:\n"
+printf '1. Edit dart_defines/\n'
+printf '2. Set Product Bundle Identifier to $(appId) in iOS Build Settings\n'
+printf "3. Add a new run script as follows in iOS Build Phases:\n"
 printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/GoogleService-Info.plist\n"
+printf "4. Product > Scheme > Edit Scheme \n"
+printf "   Select Pre-actions and Add New Run Script Action\n"
+printf "    ${SRCROOT}/scripts/extract_dart_defines.sh\n"
 printf "\e[1;34m----------------------------------------------------------\e[0m\n"
 rm setup.txt
