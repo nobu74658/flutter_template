@@ -197,7 +197,6 @@ class SD {
         showModalBottomSheet(
           barrierColor: barrierColor,
           context: context,
-          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(circularRadius),

@@ -1,28 +1,7 @@
 import 'package:flutter/material.dart';
 
-ThemeData getAppTheme() => ThemeData(
-      scaffoldBackgroundColor: Colors.white,
-      brightness: Brightness.light,
+ThemeData getAppTheme(ColorScheme colorScheme) => ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
       fontFamily: 'Regular',
-      textTheme: const TextTheme(
-        displayMedium: TextStyle(
-          fontSize: 14,
-          color: Colors.black,
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 1,
-        shadowColor: Colors.white,
-        titleTextStyle: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-        iconTheme: IconThemeData(
-          color: Colors.black,
-          size: 20,
-        ),
-      ),
     );

@@ -4,6 +4,7 @@ import 'package:app/features/auth/screens/myapp/view_model.dart';
 import 'package:app/features/auth/screens/sign_up/view.dart';
 import 'package:app/primary/other/when_error_widget.dart';
 import 'package:app/providers/firebase_provider.dart';
+import 'package:app/utils/color_schemes.g.dart';
 import 'package:app/utils/theme.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class MyApp extends ConsumerWidget {
               /// 認証前
               if (!isLogin) {
                 return MaterialApp(
-                  theme: ThemeData(useMaterial3: false),
+                  theme: getAppTheme(lightColorScheme),
                   locale: DevicePreview.locale(context),
                   builder: DevicePreview.appBuilder,
                   home: const SignUpScreen(),
@@ -35,7 +36,7 @@ class MyApp extends ConsumerWidget {
               }
 
               return MaterialApp(
-                theme: getAppTheme(),
+                theme: getAppTheme(lightColorScheme),
                 locale: DevicePreview.locale(context),
                 builder: DevicePreview.appBuilder,
                 home: const EntranceScreen(),
