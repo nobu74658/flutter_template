@@ -139,7 +139,7 @@ printf "\e[1;34m----------------------------------------------------------\n"
 printf '1. Edit dart_defines/\n'
 printf '2. Set Product Bundle Identifier to $(appId) in iOS Build Settings\n'
 printf "3. Add a new run script as follows in iOS Build Phases:\n"
-printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/GoogleService-Info.plist\n"
+printf "    cp -f \${SRCROOT}/\${flavor}/GoogleService-Info.plist \${SRCROOT}/Runner/GoogleService-Info.plist\n"
 printf "4. Product > Scheme > Edit Scheme \n"
 printf "   Select Pre-actions and Add New Run Script Action\n"
 printf "    ${SRCROOT}/scripts/extract_dart_defines.sh\n"
