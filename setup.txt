@@ -46,12 +46,12 @@ cp android/app/google-services.json android/app/src/dev/google-services.json
 buildGradleFile="android/app/build.gradle"
 newCode='// dart-define を入れる変数を宣言\
 def dartDefines = [:];\
-if (project.hasProperty('"dart-defines"')) {\
+if (project.hasProperty(\'dart-defines\')) {\
     // カンマ区切りかつBase64でエンコードされている dart-defines をデコードして変数に格納します。\
-    dartDefines = dartDefines + project.property('"dart-defines"')\
-        .split(',')\
+    dartDefines = dartDefines + project.property(\'dart-defines\')\
+        .split(\',\')\
         .collectEntries { entry ->\
-            def pair = new String(entry.decodeBase64(), 'UTF-8').split('=')\
+            def pair = new String(entry.decodeBase64(), \'UTF-8\').split(\'=\')\
             [(pair.first()): pair.last()]\
         }\
 }\
