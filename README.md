@@ -25,7 +25,8 @@ setup.shを実行すると9割程自動で環境を分けることができる�
 bash setup.sh [project-name]
 ```
 bundleIDは [project-name].app になります
-例 bash setup.sh com.hoge → com.hoge.app
+
+例) bash setup.sh com.hoge → com.hoge.app
 
 2. Edit dart_defines/
 3. Set Product Bundle Identifier to $(appId) in iOS Build Settings
