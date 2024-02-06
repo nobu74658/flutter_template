@@ -7,9 +7,6 @@ setup.shを実行すると9割程自動で環境を分けることができる�
 ## set up
 ### requirements
 - mac os
-- gradle
-  - https://docs.gradle.org/current/userguide/installation.html
-
 - flutter doctor
 ``` bash
 [✓] Flutter (Channel stable, 3.16.3, on macOS 14.0 23A344 darwin-arm64, locale ja-JP)
