@@ -19,7 +19,8 @@ setup.shを実行すると9割程自動で環境を分けることができる�
 [✓] Network resources
 ```
 
-### install
+### 環境の分離
+事前にプロジェクトを作って、Firestore, Cloud Storage, Authを有効化することを推奨
 1. setup.shを実行
 ``` bash
 bash setup.sh [project-name]
