@@ -27,6 +27,11 @@ bash setup.sh
 ```
 setup.shの出力に従って、project-name, organization, bundle-id, Firebase Projectの選択などを行う
 
+
+setup.shが終了した後にすること
+
+↓
+
 2. Edit dart_defines/
 3. Set Product Bundle Identifier to $(appId) in iOS Build Settings
 4. Add a new run script as follows in iOS Build Phases:
