@@ -2,15 +2,19 @@
 
 # flutter プロジェクト作成
 # 例： bash setup.sh com.hoge なら com.hoge.app というパッケージ名になる
-flutter create . --project-name=app --org $1 --platforms ios,android,web
+read -p "Enter Project Name: " projectName
+read -p "Enter Organization: " org
+flutter create . --project-name=$projectName --org $org --platforms ios,android,web
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
 
-
 # 本番環境と開発環境のfirebaseを選択
+read -p "Enter iOS Bundle ID: " iosBundleId
+read -p "Enter Android Package Name: " androidPackageName
+
 ## 本番環境
-printf "\e[1;34mselect release firebase project\e[0m\n"
-flutterfire configure --ios-bundle-id=$1.app --android-package-name=$1.app
+printf "\e[1;34msetup release firebase project\e[0m\n"
+flutterfire configure --ios-bundle-id="$iosBundleId" --android-package-name="$androidPackageName"
 mkdir lib/const/firebase
 mv lib/firebase_options.dart lib/const/firebase/firebase_prod_options.dart
 ### ios
@@ -29,7 +33,7 @@ mv android/app/google-services.json android/app/src/stg/google-services.json
 ## 開発環境
 printf "\e[1;34mselect development firebase project\e[0m\n"
 printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
-flutterfire configure --ios-bundle-id=$1.app.dev --android-package-name=$1.app.dev
+flutterfire configure --ios-bundle-id="$iosBundleId.dev" --android-package-name="$androidPackageName.dev"
 mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
 ### ios
 mkdir ios/dev
@@ -39,19 +43,18 @@ mv ios/firebase_app_id_file.json ios/dev/firebase_app_id_file.json
 mkdir android/app/src/dev
 cp android/app/google-services.json android/app/src/dev/google-services.json
 
-
 # 本番環境と開発環境を分けるための設定
 ## android/app/build.gradle
 # dart-define を入れる変数を宣言
 buildGradleFile="android/app/build.gradle"
 newCode='// dart-define を入れる変数を宣言\
 def dartDefines = [:];\
-if (project.hasProperty(\'dart-defines\')) {\
+if (project.hasProperty(\047dart-defines\047)) {\
     // カンマ区切りかつBase64でエンコードされている dart-defines をデコードして変数に格納します。\
-    dartDefines = dartDefines + project.property(\'dart-defines\')\
-        .split(\',\')\
+    dartDefines = dartDefines + project.property(\047dart-defines\047)\
+        .split(\047,\047)\
         .collectEntries { entry ->\
-            def pair = new String(entry.decodeBase64(), \'UTF-8\').split(\'=\')\
+            def pair = new String(entry.decodeBase64(), \047UTF-8\047).split(\047=\047)\
             [(pair.first()): pair.last()]\
         }\
 }\
@@ -144,4 +147,4 @@ printf "4. Product > Scheme > Edit Scheme \n"
 printf "   Select Pre-actions and Add New Run Script Action\n"
 printf "    \${SRCROOT}/scripts/extract_dart_defines.sh\n"
 printf "\e[1;34m----------------------------------------------------------\e[0m\n"
-rm setup.txt
+rm setup.sh
