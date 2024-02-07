@@ -23,11 +23,9 @@ setup.shを実行すると9割程自動で環境を分けることができる�
 事前にプロジェクトを作って、Firestore, Cloud Storage, Authを有効化することを推奨
 1. setup.shを実行
 ``` bash
-bash setup.sh [project-name]
+bash setup.sh
 ```
-bundleIDは [project-name].app になります
-
-例) bash setup.sh com.hoge → com.hoge.app
+setup.shの出力に従って、project-name, organization, bundle-id, Firebase Projectの選択などを行う
 
 2. Edit dart_defines/
 3. Set Product Bundle Identifier to $(appId) in iOS Build Settings
