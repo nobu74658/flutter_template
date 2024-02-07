@@ -2,8 +2,8 @@
 
 # flutter プロジェクト作成
 # 例： bash setup.sh com.hoge なら com.hoge.app というパッケージ名になる
-read -p "Enter Project Name: " projectName
-read -p "Enter Organization: " org
+read -p "Enter Project Name (例: app): " projectName
+read -p "Enter Organization（例: com.example）: " org
 flutter create . --project-name=$projectName --org $org --platforms ios,android,web
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
@@ -31,8 +31,7 @@ mkdir android/app/src/stg
 mv android/app/google-services.json android/app/src/stg/google-services.json
 
 ## 開発環境
-printf "\e[1;34mselect development firebase project\e[0m\n"
-printf "\e[1;32mPlease answer 'yes' to all options\e[0m\n"
+printf "\e[1;34msetup development firebase project\e[0m\n"
 flutterfire configure --ios-bundle-id="$iosBundleId.dev" --android-package-name="$androidPackageName.dev"
 mv lib/firebase_options.dart lib/const/firebase/firebase_dev_options.dart
 ### ios
